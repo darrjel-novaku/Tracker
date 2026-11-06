@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Baby Log</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Baby Log">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a one-handed night log. Today's count on top, a 24-hour strip, then the record; every action sits in a fixed dock under the thumb. */
+:root {
+  --bg: #F1F4F8; --surface: #FFFFFF; --surface-2: #E6EAF1; --line: #D3D9E4;
+  --fg: #182030; --muted: #566175; --on-fill: #FFFFFF;
+  --feed: #BF4A2A; --sleep: #4A56D0; --pee: #876500; --poop: #7A5430;
+  --feed-soft: #F9E3DC; --sleep-soft: #E2E4FA; --pee-soft: #F5EBC6; --poop-soft: #EFE2D4;
+  --danger: #B3261E;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1420; --surface: #191F2D; --surface-2: #252C3C; --line: #30394B;
+    --fg: #E8EBF2; --muted: #A0AABC; --on-fill: #111520;
+    --feed: #F2916F; --sleep: #98A4FF; --pee: #E9C64F; --poop: #C49A70;
+    --feed-soft: #40261F; --sleep-soft: #272C52; --pee-soft: #3B3218; --poop-soft: #392C20;
+    --danger: #FF8A80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1420; --surface: #191F2D; --surface-2: #252C3C; --line: #30394B;
+  --fg: #E8EBF2; --muted: #A0AABC; --on-fill: #111520;
+  --feed: #F2916F; --sleep: #98A4FF; --pee: #E9C64F; --poop: #C49A70;
+  --feed-soft: #40261F; --sleep-soft: #272C52; --pee-soft: #3B3218; --poop-soft: #392C20;
+  --danger: #FF8A80;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 400 16px/1.4 var(--body);
+  font-variant-numeric: tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+}
+button, input { font: inherit; color: inherit; }
+button { border: 0; background: none; cursor: pointer; touch-action: manipulation; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--sleep); outline-offset: 2px; }
+
+#app {
+  max-width: 560px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  padding-bottom: var(--dock-space, 240px);
+  display: grid; gap: 22px;
+}
+
+.top { display: flex; align-items: center; gap: 8px; }
+.baby { font: 700 1.2rem/1.2 var(--display); padding: 8px 0; text-align: left; min-width: 0; overflow-wrap: anywhere; margin-right: auto; }
+.chip { min-height: 40px; padding: 0 12px; border-radius: 20px; background: var(--surface-2); font-size: .875rem; font-weight: 600; white-space: nowrap; }
+.sync { font-size: .8125rem; color: var(--muted); margin: -16px 0 0; }
+.sync.warn { color: var(--danger); font-weight: 600; }
+
+.daynav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.daynav button { width: 44px; height: 44px; border-radius: 22px; background: var(--surface-2); font-size: 1.2rem; font-weight: 700; }
+.daynav button:disabled { opacity: .35; cursor: default; }
+.daynav strong { font-weight: 600; text-align: center; }
+
+.hero { display: grid; gap: 4px; }
+.hero-count { display: flex; align-items: baseline; gap: 10px; }
+.hero-count b { font: 700 5.25rem/.95 var(--display); color: var(--feed); letter-spacing: -.03em; }
+.hero-count span { font: 500 1.35rem/1.1 var(--display); }
+.hero p { margin: 0; color: var(--muted); }
+.hero p strong { color: var(--fg); font-weight: 600; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { background: var(--surface); border-radius: 14px; padding: 12px; }
+.stat b { display: block; font: 700 1.5rem/1.15 var(--display); white-space: nowrap; }
+.stat span { font-size: .8125rem; font-weight: 600; }
+.stat.pee span { color: var(--pee); } .stat.poop span { color: var(--poop); } .stat.sleep span { color: var(--sleep); }
+
+h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+
+.strip { display: grid; gap: 5px; }
+.lane { display: grid; grid-template-columns: 46px 1fr; align-items: center; gap: 6px; font-size: .75rem; color: var(--muted); }
+.track { position: relative; height: 18px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.mark { position: absolute; top: 0; bottom: 0; min-width: 3px; border-radius: 2px; }
+.mark.feed { background: var(--feed); } .mark.sleep { background: var(--sleep); }
+.mark.pee { background: var(--pee); } .mark.poop { background: var(--poop); }
+.mark.dot { top: 4px; bottom: 4px; width: 10px; margin-left: -5px; border-radius: 5px; }
+.track .future { position: absolute; top: 0; bottom: 0; right: 0; background: var(--bg); opacity: .62; }
+.axis { position: relative; height: 18px; margin-left: 52px; font-size: .75rem; color: var(--muted); }
+.axis span { position: absolute; transform: translateX(-50%); }
+.axis span:first-child { transform: none; } .axis span:last-child { transform: translateX(-100%); }
+
+.list { display: grid; gap: 2px; }
+.row { display: grid; grid-template-columns: auto 12px minmax(0, 1fr) auto; align-items: center; gap: 8px; width: 100%; min-height: 54px; padding: 8px 10px; text-align: left; background: var(--surface); border-radius: 4px; }
+.row:first-child { border-radius: 14px 14px 4px 4px; } .row:last-child { border-radius: 4px 4px 14px 14px; }
+.row:only-child { border-radius: 14px; }
+.row time { font-weight: 600; font-size: .9375rem; white-space: nowrap; min-width: 46px; }
+.swatch { width: 12px; height: 12px; border-radius: 6px; }
+.swatch.feed { background: var(--feed); } .swatch.sleep { background: var(--sleep); }
+.swatch.pee { background: var(--pee); } .swatch.poop { background: var(--poop); }
+.row .what { min-width: 0; overflow-wrap: anywhere; }
+.row .what b { font-weight: 600; }
+.row .what small { display: block; font-size: .8125rem; color: var(--muted); }
+.row .by { font-size: .8125rem; color: var(--muted); }
+.empty { background: var(--surface); border-radius: 14px; padding: 18px; color: var(--muted); margin: 0; }
+
+.week { width: 100%; }
+.week-row { display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, .7fr)) minmax(0, 1.2fr); gap: 4px; width: 100%; min-height: 44px; align-items: center; padding: 4px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+.week-row > :first-child { text-align: left; }
+.week-row.head { min-height: 28px; font-size: .75rem; font-weight: 600; color: var(--muted); }
+.week-row.on { background: var(--surface-2); border-radius: 8px; border-bottom-color: transparent; font-weight: 600; }
+
+#dock {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  background: var(--bg); border-top: 1px solid var(--line);
+  padding-top: 10px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.dock-in { max-width: 528px; margin: 0 auto; display: grid; gap: 8px; }
+.running { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border-radius: 12px; text-align: left; background: var(--surface); }
+.running span.label { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.running b { font: 700 1.3rem/1 var(--display); }
+.btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.act { position: relative; min-height: 64px; padding: 6px; border-radius: 16px; font-weight: 700; line-height: 1.15; display: grid; place-content: center; text-align: center; }
+.act small { display: block; font-size: .75rem; font-weight: 600; }
+.act.small { min-height: 52px; }
+.act.feed { background: var(--feed); color: var(--on-fill); }
+.act.sleep { background: var(--sleep); color: var(--on-fill); }
+.act.pee { background: var(--pee-soft); color: var(--pee); }
+.act.poop { background: var(--poop-soft); color: var(--poop); }
+.act.add { background: var(--surface-2); }
+.act.quiet { background: var(--feed-soft); color: var(--feed); }
+
+#toast { position: fixed; left: 16px; right: 16px; z-index: 6; display: flex; justify-content: center; pointer-events: none; }
+#toast div { pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: var(--fg); color: var(--bg); font-weight: 500; max-width: 528px; }
+#toast button { color: inherit; font-weight: 700; text-decoration: underline; min-height: 32px; padding: 0 4px; }
+
+#sheet { position: fixed; inset: 0; z-index: 10; background: rgba(5, 8, 15, .55); display: flex; align-items: flex-end; justify-content: center; }
+.panel {
+  width: 100%; max-width: 560px; max-height: 92%; overflow-y: auto; background: var(--surface); border-radius: 20px 20px 0 0;
+  padding-top: 18px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  display: grid; gap: 16px;
+}
+.panel h3 { margin: 0; font: 700 1.3rem/1.2 var(--display); }
+.panel p { margin: 0; color: var(--muted); }
+.field { display: grid; gap: 6px; font-weight: 600; font-size: .875rem; min-width: 0; }
+.field small { font-weight: 400; color: var(--muted); }
+.field input { width: 100%; min-width: 0; min-height: 48px; padding: 10px; font-size: 1rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); -webkit-appearance: none; appearance: none; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; padding: 4px; border-radius: 12px; background: var(--surface-2); }
+.seg button { min-height: 42px; border-radius: 9px; font-weight: 600; }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.panel-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { min-height: 48px; padding: 0 18px; border-radius: 12px; font-weight: 700; background: var(--surface-2); }
+.btn.primary { background: var(--fg); color: var(--bg); margin-left: auto; }
+.btn.delete { color: var(--danger); background: none; padding: 0 6px; }
+.connect { display: grid; gap: 14px; color: var(--fg); }
+.connect h1 { margin: 0; font: 700 1.5rem/1.2 var(--display); }
+.connect p { margin: 0; color: var(--muted); }
+.connect .error { color: var(--danger); font-weight: 600; }
+.connect .btn.primary { margin-left: 0; }
+.panel .error { color: var(--danger); font-weight: 600; margin: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .panel { animation: rise .16s ease-out; }
+  @keyframes rise { from { transform: translateY(16px); } }
+}
+</style>
+</head>
+<body>
+<main id="app"><p class="empty">Opening the log…</p></main>
+<div id="toast" hidden></div>
+<div id="dock"></div>
+<div id="sheet" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'babylog.v1';
+  var POLL_MS = 15000;
+  var MIN = 60000, HOUR = 3600000;
+  var LABEL = { feed: 'Feed', sleep: 'Sleep', pee: 'Pee', poop: 'Poop' };
+
+  var S = {
+    server: [], outbox: [], baby: 'Baby', who: '', theme: '',
+    loaded: false, offline: false, slow: false, dayOffset: 0, form: null, settingsOpen: false
+  };
+  var flushing = false, polling = false, writeSeq = 0, toastTimer = null, lastMinute = -1;
+
+  /* A running timer has no end time, whatever form that takes on the way from Google */
+  function normalize(entry) { return Object.assign({}, entry, { end: entry.end ? entry.end : null }); }
+
+  /* Saved on this phone so entries survive a dropped connection */
+  function load() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+      S.server = (saved.server || []).map(normalize); S.outbox = saved.outbox || [];
+      S.outbox.forEach(function (op) { if (op.entry) op.entry = normalize(op.entry); });
+      S.baby = saved.baby || 'Baby'; S.who = saved.who || ''; S.theme = saved.theme || ''; S.api = saved.api || '';
+      if (saved.server) S.loaded = true;
+    } catch (e) {}
+  }
+  function store() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ server: S.server, outbox: S.outbox, baby: S.baby, who: S.who, theme: S.theme, api: S.api }));
+    } catch (e) {}
+  }
+
+  /* The Google link comes from the page's own link, so it never sits in the public code */
+  function linkId(text) {
+    var value = String(text || '').trim().replace(/^#/, '');
+    var match = value.match(/\/macros\/(?:[^/]+\/)?s\/([A-Za-z0-9_-]+)/);
+    if (match) return match[1];
+    return /^[A-Za-z0-9_-]{20,}$/.test(value) ? value : '';
+  }
+  function apiUrl() { return 'https://script.google.com/macros/s/' + S.api + '/exec'; }
+
+  function rpc(name, args, ok, fail) {
+    var request = name === 'getData'
+      ? fetch(apiUrl() + '?action=getData', { cache: 'no-store' })
+      : fetch(apiUrl(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: name, arg: args[0] })
+        });
+    request.then(function (response) {
+      if (!response.ok) throw new Error('Request failed');
+      return response.json();
+    }).then(ok, fail);
+  }
+
+  function entries() {
+    var map = {};
+    S.server.forEach(function (e) { map[e.id] = e; });
+    S.outbox.forEach(function (op) {
+      if (op.k === 'save') map[op.entry.id] = op.entry;
+      if (op.k === 'del') delete map[op.id];
+    });
+    return Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return b.start - a.start; });
+  }
+  function babyName() {
+    var name = S.baby;
+    S.outbox.forEach(function (op) { if (op.k === 'baby') name = op.name; });
+    return name;
+  }
+
+  function enqueue(op) {
+    S.outbox.push(op); store(); renderAll(); flush();
+  }
+  function saveEntry(entry) { enqueue({ k: 'save', entry: entry }); }
+  function removeEntry(id) { enqueue({ k: 'del', id: id }); }
+
+  function flush() {
+    if (!S.api || flushing || !S.outbox.length) return;
+    flushing = true;
+    var op = S.outbox[0];
+    var name = op.k === 'save' ? 'saveEntry' : op.k === 'del' ? 'deleteEntry' : 'setBabyName';
+    var arg = op.k === 'save' ? Object.assign({}, op.entry, { end: op.entry.end || 0 }) : op.k === 'del' ? op.id : op.name;
+    rpc(name, [arg], function (res) {
+      flushing = false; writeSeq++;
+      S.offline = false;
+      S.outbox.shift();
+      if (op.k === 'baby') S.baby = op.name;
+      if (op.k === 'save' && res && res.ok) {
+        S.server = S.server.filter(function (e) { return e.id !== op.entry.id; }).concat([op.entry]);
+      }
+      if (op.k === 'del') S.server = S.server.filter(function (e) { return e.id !== op.id; });
+      if (res && res.ok === false) toast(res.error);
+      store();
+      if (S.outbox.length) flush(); else poll();
+      renderAll();
+    }, function () {
+      flushing = false; S.offline = true; renderStatus();
+    });
+  }
+
+  function poll() {
+    if (!S.api || polling || flushing) return;
+    if (S.outbox.length) { flush(); return; }
+    polling = true;
+    var seq = writeSeq;
+    rpc('getData', [], function (data) {
+      polling = false;
+      S.offline = false; S.slow = false;
+      if (seq === writeSeq && data) {
+        S.server = data.entries.map(normalize); S.baby = data.baby; S.loaded = true;
+        store();
+      }
+      renderAll();
+    }, function () {
+      polling = false; S.offline = true; renderAll();
+    });
+  }
+
+  /* Time helpers */
+  function newId() { return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function dayStart(offset) { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + offset).getTime(); }
+  function clock(ms) { return new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+  function span(ms) {
+    var mins = Math.max(0, Math.round(ms / MIN));
+    if (mins < 60) return mins + ' min';
+    return Math.floor(mins / 60) + 'h ' + String(mins % 60).padStart(2, '0') + 'm';
+  }
+  function hoursShort(ms) {
+    var mins = Math.round(ms / MIN);
+    return Math.floor(mins / 60) + 'h ' + String(mins % 60).padStart(2, '0');
+  }
+  function timer(ms) {
+    var total = Math.max(0, Math.floor(ms / 1000));
+    var h = Math.floor(total / 3600), m = Math.floor(total % 3600 / 60), s = total % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+  }
+  function toInput(ms) {
+    if (ms === null || ms === undefined) return '';
+    var d = new Date(ms);
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function fromInput(text) { var t = new Date(text).getTime(); return isNaN(t) ? null : t; }
+  function dayName(offset) {
+    if (offset === 0) return 'Today';
+    if (offset === -1) return 'Yesterday';
+    return new Date(dayStart(offset)).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+  function esc(text) {
+    return String(text).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  }
+  function sideText(side) { return String(side || '').replace(/, /g, ' → '); }
+  function lastSide(side) { var parts = String(side || '').split(', '); return parts[parts.length - 1]; }
+  function other(side) { return side === 'Left' ? 'Right' : 'Left'; }
+
+  function dayStats(list, offset) {
+    var from = dayStart(offset), to = dayStart(offset + 1), now = Date.now();
+    var out = { feed: 0, pee: 0, poop: 0, sleep: 0 };
+    list.forEach(function (e) {
+      if (e.type === 'sleep') {
+        var a = Math.max(e.start, from), b = Math.min(e.end === null ? now : e.end, to);
+        if (b > a) out.sleep += b - a;
+      } else if (e.start >= from && e.start < to) {
+        out[e.type]++;
+      }
+    });
+    return out;
+  }
+
+  /* Rendering */
+  function renderAll() {
+    document.documentElement.toggleAttribute('data-theme', !!S.theme);
+    if (S.theme) document.documentElement.setAttribute('data-theme', S.theme);
+    renderMain();
+    renderDock();
+  }
+  function renderStatus() {
+    var el = document.getElementById('sync');
+    if (!el) return;
+    if (S.offline) {
+      var waiting = S.outbox.length;
+      el.textContent = 'Not connected.' + (waiting ? ' ' + waiting + ' saved on this phone, waiting to sync.' : ' Showing the last saved log.');
+      el.className = 'sync warn';
+    } else {
+      el.textContent = S.outbox.length ? 'Saving…' : 'Up to date';
+      el.className = 'sync';
+    }
+  }
+
+  function renderMain() {
+    var app = document.getElementById('app');
+    if (!S.api) {
+      if (document.getElementById('connect-form')) return;
+      app.innerHTML = '<form class="empty connect" id="connect-form" novalidate><h1>Connect Baby Log</h1>' +
+        '<p>Paste your private link to connect this phone to your log. It’s the link that opened Baby Log before, or the Web app URL ending in /exec.</p>' +
+        '<label class="field" for="f-link">Private link<input id="f-link" type="url" autocomplete="off"></label>' +
+        (S.linkError ? '<p class="error" role="alert">' + esc(S.linkError) + '</p>' : '') +
+        '<button type="submit" class="btn primary">Connect</button></form>';
+      return;
+    }
+    if (!S.loaded) {
+      app.innerHTML = '<p class="empty">' + (S.slow || S.offline ? 'The log can’t be reached yet. Check your connection. It keeps trying by itself.' : 'Opening the log…') + '</p>';
+      return;
+    }
+    var list = entries();
+    var now = Date.now();
+    var off = S.dayOffset;
+    var stats = dayStats(list, off);
+    var themeWord = S.theme === 'dark' ? 'Dark' : S.theme === 'light' ? 'Light' : 'Auto';
+    var html = '';
+
+    html += '<header class="top"><button class="baby" data-act="settings">' + esc(babyName()) + '</button>' +
+      '<button class="chip" data-act="theme" aria-label="Screen theme: ' + themeWord + '">' + themeWord + '</button>' +
+      '<button class="chip" data-act="settings">' + esc(S.who || 'Who?') + '</button></header>';
+    html += '<p id="sync" class="sync"></p>';
+
+    html += '<nav class="daynav" aria-label="Choose a day"><button data-act="prev" aria-label="Previous day">‹</button><strong>' +
+      esc(dayName(off)) + '</strong><button data-act="next" aria-label="Next day"' + (off >= 0 ? ' disabled' : '') + '>›</button></nav>';
+
+    /* Count first, because that is the question this app answers */
+    html += '<section class="hero"><div class="hero-count"><b>' + stats.feed + '</b><span>' + (stats.feed === 1 ? 'feed' : 'feeds') + '</span></div>';
+    if (off === 0) {
+      var feeds = list.filter(function (e) { return e.type === 'feed'; });
+      var last = feeds[0];
+      if (!last) html += '<p>Tap Left or Right below when a feed starts.</p>';
+      else if (last.end === null) html += '<p><strong>Feeding now</strong> on ' + esc(sideText(last.side)) + '</p>';
+      else html += '<p>Last feed started <strong>' + (now - last.start < MIN ? 'just now' : span(now - last.start) + ' ago') + '</strong> at ' + clock(last.start) + '</p>';
+    }
+    html += '</section>';
+
+    html += '<section class="stats" aria-label="Totals">' +
+      '<div class="stat pee"><b>' + stats.pee + '</b><span>Pee</span></div>' +
+      '<div class="stat poop"><b>' + stats.poop + '</b><span>Poop</span></div>' +
+      '<div class="stat sleep"><b>' + hoursShort(stats.sleep) + '</b><span>Sleep</span></div></section>';
+
+    html += '<section><h2>' + (off === 0 ? 'Today, hour by hour' : 'Hour by hour') + '</h2>' + stripHtml(list, off) + '</section>';
+    html += '<section><h2>Log</h2>' + logHtml(list, off) + '</section>';
+    html += '<section><h2>Last 7 days</h2>' + weekHtml(list, off) + '</section>';
+
+    app.innerHTML = html;
+    renderStatus();
+  }
+
+  function stripHtml(list, off) {
+    var from = dayStart(off), to = dayStart(off + 1), now = Date.now(), len = to - from;
+    function pct(t) { return Math.min(100, Math.max(0, (t - from) / len * 100)); }
+    function lane(type, label) {
+      var marks = '';
+      list.forEach(function (e) {
+        if (e.type !== type) return;
+        if (type === 'pee' || type === 'poop') {
+          if (e.start >= from && e.start < to) marks += '<i class="mark dot ' + type + '" style="left:' + pct(e.start).toFixed(2) + '%"></i>';
+          return;
+        }
+        var end = e.end === null ? now : e.end;
+        if (end <= from || e.start >= to) return;
+        marks += '<i class="mark ' + type + '" style="left:' + pct(e.start).toFixed(2) + '%;width:' + (pct(end) - pct(e.start)).toFixed(2) + '%"></i>';
+      });
+      var future = off === 0 ? '<i class="future" style="left:' + pct(now).toFixed(2) + '%"></i>' : '';
+      return '<div class="lane"><span>' + label + '</span><div class="track">' + marks + future + '</div></div>';
+    }
+    return '<div class="strip">' + lane('feed', 'Feeds') + lane('sleep', 'Sleep') + lane('pee', 'Pee') + lane('poop', 'Poop') +
+      '<div class="axis"><span style="left:0">00</span><span style="left:25%">06</span><span style="left:50%">12</span><span style="left:75%">18</span><span style="left:100%">24</span></div></div>';
+  }
+
+  function logHtml(list, off) {
+    var from = dayStart(off), to = dayStart(off + 1);
+    var rows = list.filter(function (e) {
+      var end = e.end === null ? Date.now() : e.end;
+      return e.type === 'sleep' ? (end > from && e.start < to) : (e.start >= from && e.start < to);
+    });
+    if (!rows.length) return '<p class="empty">Nothing logged ' + (off === 0 ? 'yet today' : 'on this day') + '.</p>';
+    return '<div class="list">' + rows.map(function (e) {
+      var detail = '';
+      if (e.type === 'feed') detail = sideText(e.side) + (e.end === null ? ', in progress' : ', ' + span(e.end - e.start));
+      if (e.type === 'sleep') {
+        var range = e.end === null ? 'in progress' : span(e.end - e.start) + ', until ' + clock(e.end);
+        detail = (e.start < from ? 'from yesterday, ' : '') + range;
+      }
+      return '<button class="row" data-act="edit" data-id="' + esc(e.id) + '"><time>' + clock(e.start) + '</time><span class="swatch ' + e.type + '"></span>' +
+        '<span class="what"><b>' + LABEL[e.type] + '</b>' + (detail ? '<small>' + esc(detail) + '</small>' : '') + '</span>' +
+        '<span class="by">' + esc(e.by) + '</span></button>';
+    }).join('') + '</div>';
+  }
+
+  function weekHtml(list, off) {
+    var html = '<div class="week"><div class="week-row head"><span>Day</span><span>Feeds</span><span>Pee</span><span>Poop</span><span>Sleep</span></div>';
+    for (var i = 0; i > -7; i--) {
+      var s = dayStats(list, i);
+      html += '<button class="week-row' + (i === off ? ' on' : '') + '" data-act="day" data-day="' + i + '"><span>' + esc(dayName(i)) + '</span><span>' + s.feed + '</span><span>' + s.pee + '</span><span>' + s.poop + '</span><span>' + hoursShort(s.sleep) + '</span></button>';
+    }
+    return html + '</div>';
+  }
+
+  function renderDock() {
+    var dock = document.getElementById('dock');
+    if (!S.api || !S.loaded) { dock.innerHTML = ''; measureDock(); return; }
+    var list = entries();
+    var feedNow = list.filter(function (e) { return e.type === 'feed' && e.end === null; })[0];
+    var sleepNow = list.filter(function (e) { return e.type === 'sleep' && e.end === null; })[0];
+    var lastFeed = list.filter(function (e) { return e.type === 'feed' && e.end !== null; })[0];
+    var next = lastFeed ? other(lastSide(lastFeed.side)) : '';
+    var html = '<div class="dock-in">';
+
+    [feedNow, sleepNow].forEach(function (e) {
+      if (!e) return;
+      var label = e.type === 'feed' ? 'Feeding: ' + sideText(e.side) : 'Sleeping since ' + clock(e.start);
+      html += '<button class="running" data-act="edit" data-id="' + esc(e.id) + '"><span class="swatch ' + e.type + '"></span><span class="label">' + esc(label) + '</span><b data-since="' + e.start + '">' + timer(Date.now() - e.start) + '</b></button>';
+    });
+
+    html += '<div class="btns">';
+    if (feedNow) {
+      html += '<button class="act quiet" data-act="switch" data-id="' + esc(feedNow.id) + '">Switch<small>to ' + other(lastSide(feedNow.side)) + '</small></button>';
+      html += '<button class="act feed" data-act="stop" data-id="' + esc(feedNow.id) + '">Stop<small>feed</small></button>';
+    } else {
+      ['Left', 'Right'].forEach(function (side) {
+        html += '<button class="act feed" data-act="feed" data-side="' + side + '">Feed ' + side + '<small>' + (next === side ? 'next side' : '&nbsp;') + '</small></button>';
+      });
+    }
+    html += sleepNow
+      ? '<button class="act sleep" data-act="stop" data-id="' + esc(sleepNow.id) + '">Woke up<small>stop sleep</small></button>'
+      : '<button class="act sleep" data-act="sleep">Sleep<small>start</small></button>';
+    html += '<button class="act small pee" data-act="tap" data-type="pee">Pee</button>' +
+      '<button class="act small poop" data-act="tap" data-type="poop">Poop</button>' +
+      '<button class="act small add" data-act="add">Add past</button></div></div>';
+    dock.innerHTML = html;
+    measureDock();
+  }
+
+  function measureDock() {
+    var height = document.getElementById('dock').offsetHeight;
+    document.documentElement.style.setProperty('--dock-space', (height + 20) + 'px');
+    var box = document.getElementById('toast');
+    box.style.bottom = (height + 8) + 'px';
+  }
+
+  function toast(message, undo) {
+    var box = document.getElementById('toast');
+    clearTimeout(toastTimer);
+    box.innerHTML = '';
+    var inner = document.createElement('div');
+    var text = document.createElement('span');
+    text.textContent = message;
+    inner.appendChild(text);
+    if (undo) {
+      var btn = document.createElement('button');
+      btn.textContent = 'Undo';
+      btn.onclick = function () { box.hidden = true; undo(); };
+      inner.appendChild(btn);
+    }
+    box.appendChild(inner);
+    box.hidden = false;
+    measureDock();
+    toastTimer = setTimeout(function () { box.hidden = true; }, 6000);
+  }
+
+  /* Editor sheet */
+  function openForm(entry) {
+    var now = Date.now();
+    S.form = entry ? {
+      id: entry.id, isNew: false, type: entry.type, side: entry.side, by: entry.by,
+      start: toInput(entry.start), end: toInput(entry.end), error: ''
+    } : {
+      id: newId(), isNew: true, type: 'feed', side: 'Left', by: S.who,
+      start: toInput(now - 20 * MIN), end: toInput(now), error: ''
+    };
+    renderSheet();
+  }
+
+  function renderSheet() {
+    var sheet = document.getElementById('sheet');
+    var f = S.form;
+    if (S.settingsOpen) { renderSettings(sheet); return; }
+    if (!f) { sheet.hidden = true; sheet.innerHTML = ''; return; }
+    var timed = f.type === 'feed' || f.type === 'sleep';
+    var html = '<form class="panel" id="entry-form" novalidate><h3>' + (f.isNew ? 'Add a past entry' : 'Edit ' + LABEL[f.type].toLowerCase()) + '</h3>';
+    if (f.isNew) {
+      html += '<div class="seg" role="group" aria-label="Type">' + ['feed', 'sleep', 'pee', 'poop'].map(function (t) {
+        return '<button type="button" data-form="type" data-value="' + t + '" aria-pressed="' + (f.type === t) + '">' + LABEL[t] + '</button>';
+      }).join('') + '</div>';
+    }
+    if (f.type === 'feed') {
+      var current = f.side.indexOf(', ') > -1 ? 'Both' : f.side;
+      html += '<div class="seg" role="group" aria-label="Side">' + ['Left', 'Right', 'Both'].map(function (s) {
+        return '<button type="button" data-form="side" data-value="' + s + '" aria-pressed="' + (current === s) + '">' + s + '</button>';
+      }).join('') + '</div>';
+    }
+    html += '<label class="field" for="f-start">' + (timed ? 'Started' : 'Time') + '<input id="f-start" type="datetime-local" value="' + esc(f.start) + '"></label>';
+    if (timed) html += '<label class="field" for="f-end"><span>Ended <small>(leave empty if it’s still going)</small></span><input id="f-end" type="datetime-local" value="' + esc(f.end) + '"></label>';
+    if (f.error) html += '<p class="error" role="alert">' + esc(f.error) + '</p>';
+    html += '<div class="panel-actions">' + (f.isNew ? '' : '<button type="button" class="btn delete" data-form="delete">Delete</button>') +
+      '<button type="button" class="btn" data-form="cancel" style="margin-left:auto">Cancel</button><button type="submit" class="btn primary" style="margin-left:0">Save</button></div></form>';
+    sheet.innerHTML = html;
+    sheet.hidden = false;
+  }
+
+  function renderSettings(sheet) {
+    var first = !S.who;
+    var html = '<form class="panel" id="settings-form" novalidate><h3>' + (first ? 'Who’s using this phone?' : 'Settings') + '</h3>' +
+      (first ? '<p>Each entry shows who logged it. You only need to pick this once on each phone.</p>' : '') +
+      '<div class="seg" role="group" aria-label="Who is using this phone">' + ['Mom', 'Dad', 'Other'].map(function (w) {
+        return '<button type="button" data-who="' + w + '" aria-pressed="' + (S.draftWho === w) + '">' + w + '</button>';
+      }).join('') + '</div>' +
+      '<label class="field" for="f-baby">Baby’s name<input id="f-baby" type="text" maxlength="30" autocomplete="off" value="' + esc(S.draftBaby) + '"></label>' +
+      (S.settingsError ? '<p class="error" role="alert">' + esc(S.settingsError) + '</p>' : '') +
+      '<div class="panel-actions">' + (first ? '' : '<button type="button" class="btn" data-who-cancel="1" style="margin-left:auto">Cancel</button>') +
+      '<button type="submit" class="btn primary"' + (first ? '' : ' style="margin-left:0"') + '>Save</button></div></form>';
+    sheet.innerHTML = html;
+    sheet.hidden = false;
+  }
+  function openSettings() {
+    S.settingsOpen = true; S.draftWho = S.who; S.draftBaby = babyName(); S.settingsError = '';
+    renderSheet();
+  }
+
+  function submitEntry() {
+    var f = S.form;
+    f.start = document.getElementById('f-start').value;
+    var endInput = document.getElementById('f-end');
+    f.end = endInput ? endInput.value : '';
+    var timed = f.type === 'feed' || f.type === 'sleep';
+    var start = fromInput(f.start);
+    var end = timed && f.end ? fromInput(f.end) : null;
+    var limit = Date.now() + MIN;
+    f.error = '';
+    if (start === null) f.error = 'Enter when it started.';
+    else if (start > limit) f.error = 'The start time is in the future. Choose an earlier time.';
+    else if (end !== null && end > limit) f.error = 'The end time is in the future. Choose an earlier time, or leave it empty.';
+    else if (end !== null && end < start) f.error = 'The end time is before the start time.';
+    if (f.error) { renderSheet(); return; }
+    var side = '';
+    if (f.type === 'feed') side = f.side || 'Left';
+    saveEntry({ id: f.id, type: f.type, start: start, end: end, side: side, by: f.by || S.who });
+    var message = LABEL[f.type] + ' saved';
+    S.form = null; renderSheet();
+    toast(message);
+  }
+
+  /* Actions */
+  function find(id) { return entries().filter(function (e) { return e.id === id; })[0]; }
+  function startTimer(type, side) {
+    var entry = { id: newId(), type: type, start: Date.now(), end: null, side: side || '', by: S.who };
+    saveEntry(entry);
+    toast((type === 'feed' ? 'Feed started on ' + side : 'Sleep started'), function () { removeEntry(entry.id); });
+  }
+  function act(el) {
+    var a = el.getAttribute('data-act');
+    var id = el.getAttribute('data-id');
+    if (a === 'feed') startTimer('feed', el.getAttribute('data-side'));
+    if (a === 'sleep') startTimer('sleep');
+    if (a === 'tap') {
+      var type = el.getAttribute('data-type');
+      var entry = { id: newId(), type: type, start: Date.now(), end: null, side: '', by: S.who };
+      entry.end = entry.start;
+      saveEntry(entry);
+      toast(LABEL[type] + ' logged at ' + clock(entry.start), function () { removeEntry(entry.id); });
+    }
+    if (a === 'stop') {
+      var running = find(id);
+      if (!running) return;
+      var stopped = Object.assign({}, running, { end: Date.now() });
+      saveEntry(stopped);
+      toast(LABEL[running.type] + ' saved, ' + span(stopped.end - stopped.start), function () { saveEntry(running); });
+    }
+    if (a === 'switch') {
+      var feed = find(id);
+      if (!feed) return;
+      var parts = feed.side.split(', ');
+      parts.push(other(parts[parts.length - 1]));
+      saveEntry(Object.assign({}, feed, { side: parts.slice(-20).join(', ') }));
+    }
+    if (a === 'edit') { var target = find(id); if (target) openForm(target); }
+    if (a === 'add') openForm(null);
+    if (a === 'settings') openSettings();
+    if (a === 'theme') {
+      S.theme = S.theme === '' ? 'dark' : S.theme === 'dark' ? 'light' : '';
+      store(); renderAll();
+    }
+    if (a === 'prev') { S.dayOffset = Math.max(-60, S.dayOffset - 1); renderAll(); }
+    if (a === 'next') { S.dayOffset = Math.min(0, S.dayOffset + 1); renderAll(); }
+    if (a === 'day') { S.dayOffset = Number(el.getAttribute('data-day')); renderAll(); window.scrollTo(0, 0); }
+  }
+
+  document.addEventListener('click', function (event) {
+    var acting = event.target.closest('[data-act]');
+    if (acting) { act(acting); return; }
+    var whoBtn = event.target.closest('[data-who]');
+    if (whoBtn) {
+      S.draftBaby = document.getElementById('f-baby').value;
+      S.draftWho = whoBtn.getAttribute('data-who'); S.settingsError = ''; renderSheet(); return;
+    }
+    if (event.target.closest('[data-who-cancel]')) { S.settingsOpen = false; renderSheet(); return; }
+    var control = event.target.closest('[data-form]');
+    if (control && S.form) {
+      var what = control.getAttribute('data-form');
+      S.form.start = document.getElementById('f-start').value;
+      var endEl = document.getElementById('f-end');
+      if (endEl) S.form.end = endEl.value;
+      if (what === 'type') { S.form.type = control.getAttribute('data-value'); renderSheet(); }
+      if (what === 'side') {
+        var value = control.getAttribute('data-value');
+        if (value === 'Both') { if (S.form.side.indexOf(', ') === -1) S.form.side = 'Left, Right'; }
+        else S.form.side = value;
+        renderSheet();
+      }
+      if (what === 'cancel') { S.form = null; renderSheet(); }
+      if (what === 'delete') {
+        var old = find(S.form.id);
+        removeEntry(S.form.id);
+        S.form = null; renderSheet();
+        toast(LABEL[old.type] + ' deleted', function () { saveEntry(old); });
+      }
+    }
+  });
+  document.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (event.target.id === 'connect-form') {
+      var pasted = linkId(document.getElementById('f-link').value);
+      if (!pasted) {
+        S.linkError = 'That doesn’t look like your Baby Log link. Copy the whole link and try again.';
+        document.getElementById('app').innerHTML = '';
+        renderMain();
+        return;
+      }
+      S.api = pasted; S.linkError = ''; store(); document.getElementById('app').innerHTML = '';
+      renderAll(); poll();
+      if (!S.who) openSettings();
+      return;
+    }
+    if (event.target.id === 'entry-form') submitEntry();
+    if (event.target.id === 'settings-form') {
+      S.draftBaby = document.getElementById('f-baby').value;
+      if (!S.draftWho) { S.settingsError = 'Choose who is using this phone.'; renderSheet(); return; }
+      var name = S.draftBaby.trim() || 'Baby';
+      S.who = S.draftWho; S.settingsOpen = false; store(); renderSheet();
+      if (name !== babyName()) enqueue({ k: 'baby', name: name }); else renderAll();
+    }
+  });
+
+  /* Keeps the running timers and the "ago" text current */
+  setInterval(function () {
+    var now = Date.now();
+    document.querySelectorAll('[data-since]').forEach(function (el) { el.textContent = timer(now - Number(el.getAttribute('data-since'))); });
+    var minute = Math.floor(now / MIN);
+    if (minute !== lastMinute) {
+      lastMinute = minute;
+      if (S.loaded && !document.activeElement.closest('#sheet')) renderMain();
+    }
+  }, 1000);
+  setInterval(poll, POLL_MS);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) poll(); });
+  window.addEventListener('online', poll);
+  window.addEventListener('resize', measureDock);
+  setTimeout(function () { if (!S.loaded) { S.slow = true; renderMain(); } }, 10000);
+
+  load();
+  var fromLink = linkId(location.hash);
+  if (fromLink && fromLink !== S.api) {
+    S.api = fromLink; S.server = []; S.outbox = []; S.loaded = false; store();
+  }
+  renderAll();
+  poll();
+  if (S.api && !S.who) openSettings();
+})();
+</script>
+</body>
+</html>

@@ -16,8 +16,8 @@
 :root {
   --bg: #F1F4F8; --surface: #FFFFFF; --surface-2: #E6EAF1; --line: #D3D9E4;
   --fg: #182030; --muted: #566175; --on-fill: #FFFFFF;
-  --feed: #BF4A2A; --sleep: #4A56D0; --pee: #876500; --poop: #7A5430;
-  --feed-soft: #F9E3DC; --sleep-soft: #E2E4FA; --pee-soft: #F5EBC6; --poop-soft: #EFE2D4;
+  --feed: #BF4A2A; --sleep: #4A56D0; --medicine: #0B7666; --poop: #7A5430;
+  --feed-soft: #F9E3DC; --sleep-soft: #E2E4FA; --medicine-soft: #D6F1EB; --poop-soft: #EFE2D4;
   --danger: #B3261E;
   --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --body: "Figtree", -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
@@ -26,8 +26,8 @@
   :root:not([data-theme="light"]) {
     --bg: #0F1420; --surface: #191F2D; --surface-2: #252C3C; --line: #30394B;
     --fg: #E8EBF2; --muted: #A0AABC; --on-fill: #111520;
-    --feed: #F2916F; --sleep: #98A4FF; --pee: #E9C64F; --poop: #C49A70;
-    --feed-soft: #40261F; --sleep-soft: #272C52; --pee-soft: #3B3218; --poop-soft: #392C20;
+    --feed: #F2916F; --sleep: #98A4FF; --medicine: #5FD6C2; --poop: #C49A70;
+    --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
     --danger: #FF8A80;
     color-scheme: dark;
   }
@@ -35,8 +35,8 @@
 :root[data-theme="dark"] {
   --bg: #0F1420; --surface: #191F2D; --surface-2: #252C3C; --line: #30394B;
   --fg: #E8EBF2; --muted: #A0AABC; --on-fill: #111520;
-  --feed: #F2916F; --sleep: #98A4FF; --pee: #E9C64F; --poop: #C49A70;
-  --feed-soft: #40261F; --sleep-soft: #272C52; --pee-soft: #3B3218; --poop-soft: #392C20;
+  --feed: #F2916F; --sleep: #98A4FF; --medicine: #5FD6C2; --poop: #C49A70;
+  --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
   --danger: #FF8A80;
   color-scheme: dark;
 }
@@ -73,6 +73,14 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--sleep); out
 .daynav button:disabled { opacity: .35; cursor: default; }
 .daynav strong { font-weight: 600; text-align: center; }
 
+.med { display: grid; gap: 2px; padding: 14px; border-radius: 14px; background: var(--medicine-soft); color: var(--fg); }
+.med small { font-size: .8125rem; font-weight: 600; color: var(--medicine); }
+.med b { font: 700 1.6rem/1.15 var(--display); }
+.med span { color: var(--muted); font-size: .9375rem; }
+.med.due { background: var(--danger); color: var(--bg); }
+.med.due small, .med.due span { color: var(--bg); }
+.topic { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.topic code { flex: 1 1 200px; min-width: 0; padding: 10px; border-radius: 10px; background: var(--bg); overflow-wrap: anywhere; font-size: .875rem; }
 .hero { display: grid; gap: 4px; }
 .hero-count { display: flex; align-items: baseline; gap: 10px; }
 .hero-count b { font: 700 5.25rem/.95 var(--display); color: var(--feed); letter-spacing: -.03em; }
@@ -84,7 +92,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--sleep); out
 .stat { background: var(--surface); border-radius: 14px; padding: 12px; }
 .stat b { display: block; font: 700 1.5rem/1.15 var(--display); white-space: nowrap; }
 .stat span { font-size: .8125rem; font-weight: 600; }
-.stat.pee span { color: var(--pee); } .stat.poop span { color: var(--poop); } .stat.sleep span { color: var(--sleep); }
+.stat.medicine span { color: var(--medicine); } .stat.poop span { color: var(--poop); } .stat.sleep span { color: var(--sleep); }
 
 h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
 
@@ -93,7 +101,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 .track { position: relative; height: 18px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
 .mark { position: absolute; top: 0; bottom: 0; min-width: 3px; border-radius: 2px; }
 .mark.feed { background: var(--feed); } .mark.sleep { background: var(--sleep); }
-.mark.pee { background: var(--pee); } .mark.poop { background: var(--poop); }
+.mark.medicine { background: var(--medicine); } .mark.poop { background: var(--poop); }
 .mark.dot { top: 4px; bottom: 4px; width: 10px; margin-left: -5px; border-radius: 5px; }
 .track .future { position: absolute; top: 0; bottom: 0; right: 0; background: var(--bg); opacity: .62; }
 .axis { position: relative; height: 18px; margin-left: 52px; font-size: .75rem; color: var(--muted); }
@@ -107,7 +115,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 .row time { font-weight: 600; font-size: .9375rem; white-space: nowrap; min-width: 46px; }
 .swatch { width: 12px; height: 12px; border-radius: 6px; }
 .swatch.feed { background: var(--feed); } .swatch.sleep { background: var(--sleep); }
-.swatch.pee { background: var(--pee); } .swatch.poop { background: var(--poop); }
+.swatch.medicine { background: var(--medicine); } .swatch.poop { background: var(--poop); }
 .row .what { min-width: 0; overflow-wrap: anywhere; }
 .row .what b { font-weight: 600; }
 .row .what small { display: block; font-size: .8125rem; color: var(--muted); }
@@ -115,7 +123,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 .empty { background: var(--surface); border-radius: 14px; padding: 18px; color: var(--muted); margin: 0; }
 
 .week { width: 100%; }
-.week-row { display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, .7fr)) minmax(0, 1.2fr); gap: 4px; width: 100%; min-height: 44px; align-items: center; padding: 4px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+.week-row { display: grid; grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(0, .85fr)) minmax(0, 1.05fr); gap: 4px; width: 100%; min-height: 44px; align-items: center; padding: 4px 10px; text-align: right; border-bottom: 1px solid var(--line); }
 .week-row > :first-child { text-align: left; }
 .week-row.head { min-height: 28px; font-size: .75rem; font-weight: 600; color: var(--muted); }
 .week-row.on { background: var(--surface-2); border-radius: 8px; border-bottom-color: transparent; font-weight: 600; }
@@ -138,12 +146,13 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 .act.small { min-height: 52px; }
 .act.feed { background: var(--feed); color: var(--on-fill); }
 .act.sleep { background: var(--sleep); color: var(--on-fill); }
-.act.pee { background: var(--pee-soft); color: var(--pee); }
+.act.medicine { background: var(--medicine); color: var(--on-fill); grid-column: span 2; }
+.act.medicine.calm { background: var(--medicine-soft); color: var(--medicine); }
+.act.poop-main { background: var(--poop); color: var(--on-fill); }
 .act.poop { background: var(--poop-soft); color: var(--poop); }
 .act.add { background: var(--surface-2); }
-.act.quiet { background: var(--feed-soft); color: var(--feed); }
 
-#toast { position: fixed; left: 16px; right: 16px; z-index: 6; display: flex; justify-content: center; pointer-events: none; }
+#toast { position: fixed; left: 16px; right: 16px; z-index: 11; display: flex; justify-content: center; pointer-events: none; }
 #toast div { pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: var(--fg); color: var(--bg); font-weight: 500; max-width: 528px; }
 #toast button { color: inherit; font-weight: 700; text-decoration: underline; min-height: 32px; padding: 0 4px; }
 
@@ -192,16 +201,19 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
   var KEY = 'babylog.v1';
   var POLL_MS = 15000;
   var MIN = 60000, HOUR = 3600000;
-  var LABEL = { feed: 'Feed', sleep: 'Sleep', pee: 'Pee', poop: 'Poop' };
+  var LABEL = { feed: 'Feed', sleep: 'Sleep', poop: 'Poop', medicine: 'Medicine' };
 
   var S = {
-    server: [], outbox: [], baby: 'Baby', who: '', theme: '',
+    server: [], outbox: [], baby: 'Baby', medHours: 8, topic: '', who: '', theme: '',
     loaded: false, offline: false, slow: false, dayOffset: 0, form: null, settingsOpen: false
   };
   var flushing = false, polling = false, writeSeq = 0, toastTimer = null, lastMinute = -1;
 
   /* A running timer has no end time, whatever form that takes on the way from Google */
-  function normalize(entry) { return Object.assign({}, entry, { end: entry.end ? entry.end : null }); }
+  function normalize(entry) {
+    var end = entry.type === 'sleep' ? (entry.end ? entry.end : null) : entry.start;
+    return Object.assign({}, entry, { end: end });
+  }
 
   /* Saved on this phone so entries survive a dropped connection */
   function load() {
@@ -209,13 +221,13 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
       S.server = (saved.server || []).map(normalize); S.outbox = saved.outbox || [];
       S.outbox.forEach(function (op) { if (op.entry) op.entry = normalize(op.entry); });
-      S.baby = saved.baby || 'Baby'; S.who = saved.who || ''; S.theme = saved.theme || ''; S.api = saved.api || '';
+      S.baby = saved.baby || 'Baby'; S.medHours = saved.medHours || 8; S.topic = saved.topic || ''; S.who = saved.who || ''; S.theme = saved.theme || ''; S.api = saved.api || '';
       if (saved.server) S.loaded = true;
     } catch (e) {}
   }
   function store() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ server: S.server, outbox: S.outbox, baby: S.baby, who: S.who, theme: S.theme, api: S.api }));
+      localStorage.setItem(KEY, JSON.stringify({ server: S.server, outbox: S.outbox, baby: S.baby, medHours: S.medHours, topic: S.topic, who: S.who, theme: S.theme, api: S.api }));
     } catch (e) {}
   }
 
@@ -296,7 +308,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       polling = false;
       S.offline = false; S.slow = false;
       if (seq === writeSeq && data) {
-        S.server = data.entries.map(normalize); S.baby = data.baby; S.loaded = true;
+        S.server = data.entries.map(normalize); S.baby = data.baby; S.medHours = data.medicineHours || 8; S.topic = data.notifyTopic || ''; S.loaded = true;
         store();
       }
       renderAll();
@@ -338,13 +350,10 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
   function esc(text) {
     return String(text).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
-  function sideText(side) { return String(side || '').replace(/, /g, ' → '); }
-  function lastSide(side) { var parts = String(side || '').split(', '); return parts[parts.length - 1]; }
-  function other(side) { return side === 'Left' ? 'Right' : 'Left'; }
 
   function dayStats(list, offset) {
     var from = dayStart(offset), to = dayStart(offset + 1), now = Date.now();
-    var out = { feed: 0, pee: 0, poop: 0, sleep: 0 };
+    var out = { feed: 0, poop: 0, medicine: 0, sleep: 0 };
     list.forEach(function (e) {
       if (e.type === 'sleep') {
         var a = Math.max(e.start, from), b = Math.min(e.end === null ? now : e.end, to);
@@ -403,6 +412,8 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       '<button class="chip" data-act="settings">' + esc(S.who || 'Who?') + '</button></header>';
     html += '<p id="sync" class="sync"></p>';
 
+    html += medHtml(list, now);
+
     html += '<nav class="daynav" aria-label="Choose a day"><button data-act="prev" aria-label="Previous day">‹</button><strong>' +
       esc(dayName(off)) + '</strong><button data-act="next" aria-label="Next day"' + (off >= 0 ? ' disabled' : '') + '>›</button></nav>';
 
@@ -411,15 +422,14 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     if (off === 0) {
       var feeds = list.filter(function (e) { return e.type === 'feed'; });
       var last = feeds[0];
-      if (!last) html += '<p>Tap Left or Right below when a feed starts.</p>';
-      else if (last.end === null) html += '<p><strong>Feeding now</strong> on ' + esc(sideText(last.side)) + '</p>';
-      else html += '<p>Last feed started <strong>' + (now - last.start < MIN ? 'just now' : span(now - last.start) + ' ago') + '</strong> at ' + clock(last.start) + '</p>';
+      if (!last) html += '<p>Tap Feed below after each feed.</p>';
+      else html += '<p>Last feed <strong>' + (now - last.start < MIN ? 'just now' : span(now - last.start) + ' ago') + '</strong> at ' + clock(last.start) + '</p>';
     }
     html += '</section>';
 
     html += '<section class="stats" aria-label="Totals">' +
-      '<div class="stat pee"><b>' + stats.pee + '</b><span>Pee</span></div>' +
       '<div class="stat poop"><b>' + stats.poop + '</b><span>Poop</span></div>' +
+      '<div class="stat medicine"><b>' + stats.medicine + '</b><span>Medicine</span></div>' +
       '<div class="stat sleep"><b>' + hoursShort(stats.sleep) + '</b><span>Sleep</span></div></section>';
 
     html += '<section><h2>' + (off === 0 ? 'Today, hour by hour' : 'Hour by hour') + '</h2>' + stripHtml(list, off) + '</section>';
@@ -430,6 +440,21 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     renderStatus();
   }
 
+  function lastDose(list) { return list.filter(function (e) { return e.type === 'medicine'; })[0]; }
+
+  /* Counts from the latest dose, so only logging a dose restarts it */
+  function medHtml(list, now) {
+    var dose = lastDose(list);
+    if (!dose) return '<section class="med"><small>Medicine</small><b>No dose logged</b><span>Tap Medicine given to start the ' + S.medHours + '-hour countdown.</span></section>';
+    var due = dose.start + S.medHours * HOUR;
+    var given = 'Last dose at ' + clock(dose.start) + (dose.by ? ' by ' + esc(dose.by) : '');
+    if (now >= due) {
+      return '<section class="med due"><small>Medicine due</small><b>' + (now - due < MIN ? 'Due now' : span(now - due) + ' overdue') + '</b><span>' + given + '</span></section>';
+    }
+    var left = due - now;
+    return '<section class="med"><small>Next medicine</small><b>In ' + (left < MIN ? 'under 1 min' : span(left)) + '</b><span>Due at ' + clock(due) + '. ' + given + '</span></section>';
+  }
+
   function stripHtml(list, off) {
     var from = dayStart(off), to = dayStart(off + 1), now = Date.now(), len = to - from;
     function pct(t) { return Math.min(100, Math.max(0, (t - from) / len * 100)); }
@@ -437,7 +462,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       var marks = '';
       list.forEach(function (e) {
         if (e.type !== type) return;
-        if (type === 'pee' || type === 'poop') {
+        if (type !== 'sleep') {
           if (e.start >= from && e.start < to) marks += '<i class="mark dot ' + type + '" style="left:' + pct(e.start).toFixed(2) + '%"></i>';
           return;
         }
@@ -448,7 +473,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       var future = off === 0 ? '<i class="future" style="left:' + pct(now).toFixed(2) + '%"></i>' : '';
       return '<div class="lane"><span>' + label + '</span><div class="track">' + marks + future + '</div></div>';
     }
-    return '<div class="strip">' + lane('feed', 'Feeds') + lane('sleep', 'Sleep') + lane('pee', 'Pee') + lane('poop', 'Poop') +
+    return '<div class="strip">' + lane('feed', 'Feeds') + lane('sleep', 'Sleep') + lane('poop', 'Poop') + lane('medicine', 'Meds') +
       '<div class="axis"><span style="left:0">00</span><span style="left:25%">06</span><span style="left:50%">12</span><span style="left:75%">18</span><span style="left:100%">24</span></div></div>';
   }
 
@@ -461,7 +486,6 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     if (!rows.length) return '<p class="empty">Nothing logged ' + (off === 0 ? 'yet today' : 'on this day') + '.</p>';
     return '<div class="list">' + rows.map(function (e) {
       var detail = '';
-      if (e.type === 'feed') detail = sideText(e.side) + (e.end === null ? ', in progress' : ', ' + span(e.end - e.start));
       if (e.type === 'sleep') {
         var range = e.end === null ? 'in progress' : span(e.end - e.start) + ', until ' + clock(e.end);
         detail = (e.start < from ? 'from yesterday, ' : '') + range;
@@ -473,10 +497,10 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
   }
 
   function weekHtml(list, off) {
-    var html = '<div class="week"><div class="week-row head"><span>Day</span><span>Feeds</span><span>Pee</span><span>Poop</span><span>Sleep</span></div>';
+    var html = '<div class="week"><div class="week-row head"><span>Day</span><span>Feeds</span><span>Poop</span><span>Meds</span><span>Sleep</span></div>';
     for (var i = 0; i > -7; i--) {
       var s = dayStats(list, i);
-      html += '<button class="week-row' + (i === off ? ' on' : '') + '" data-act="day" data-day="' + i + '"><span>' + esc(dayName(i)) + '</span><span>' + s.feed + '</span><span>' + s.pee + '</span><span>' + s.poop + '</span><span>' + hoursShort(s.sleep) + '</span></button>';
+      html += '<button class="week-row' + (i === off ? ' on' : '') + '" data-act="day" data-day="' + i + '"><span>' + esc(dayName(i)) + '</span><span>' + s.feed + '</span><span>' + s.poop + '</span><span>' + s.medicine + '</span><span>' + hoursShort(s.sleep) + '</span></button>';
     }
     return html + '</div>';
   }
@@ -485,32 +509,20 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     var dock = document.getElementById('dock');
     if (!S.api || !S.loaded) { dock.innerHTML = ''; measureDock(); return; }
     var list = entries();
-    var feedNow = list.filter(function (e) { return e.type === 'feed' && e.end === null; })[0];
     var sleepNow = list.filter(function (e) { return e.type === 'sleep' && e.end === null; })[0];
-    var lastFeed = list.filter(function (e) { return e.type === 'feed' && e.end !== null; })[0];
-    var next = lastFeed ? other(lastSide(lastFeed.side)) : '';
+    var dose = lastDose(list);
+    var isDue = !dose || Date.now() >= dose.start + S.medHours * HOUR;
     var html = '<div class="dock-in">';
-
-    [feedNow, sleepNow].forEach(function (e) {
-      if (!e) return;
-      var label = e.type === 'feed' ? 'Feeding: ' + sideText(e.side) : 'Sleeping since ' + clock(e.start);
-      html += '<button class="running" data-act="edit" data-id="' + esc(e.id) + '"><span class="swatch ' + e.type + '"></span><span class="label">' + esc(label) + '</span><b data-since="' + e.start + '">' + timer(Date.now() - e.start) + '</b></button>';
-    });
-
-    html += '<div class="btns">';
-    if (feedNow) {
-      html += '<button class="act quiet" data-act="switch" data-id="' + esc(feedNow.id) + '">Switch<small>to ' + other(lastSide(feedNow.side)) + '</small></button>';
-      html += '<button class="act feed" data-act="stop" data-id="' + esc(feedNow.id) + '">Stop<small>feed</small></button>';
-    } else {
-      ['Left', 'Right'].forEach(function (side) {
-        html += '<button class="act feed" data-act="feed" data-side="' + side + '">Feed ' + side + '<small>' + (next === side ? 'next side' : '&nbsp;') + '</small></button>';
-      });
+    if (sleepNow) {
+      html += '<button class="running" data-act="edit" data-id="' + esc(sleepNow.id) + '"><span class="swatch sleep"></span><span class="label">' + esc('Sleeping since ' + clock(sleepNow.start)) + '</span><b data-since="' + sleepNow.start + '">' + timer(Date.now() - sleepNow.start) + '</b></button>';
     }
+    html += '<div class="btns">' +
+      '<button class="act feed" data-act="tap" data-type="feed">Feed</button>' +
+      '<button class="act poop-main" data-act="tap" data-type="poop">Poop</button>';
     html += sleepNow
       ? '<button class="act sleep" data-act="stop" data-id="' + esc(sleepNow.id) + '">Woke up<small>stop sleep</small></button>'
       : '<button class="act sleep" data-act="sleep">Sleep<small>start</small></button>';
-    html += '<button class="act small pee" data-act="tap" data-type="pee">Pee</button>' +
-      '<button class="act small poop" data-act="tap" data-type="poop">Poop</button>' +
+    html += '<button class="act small medicine' + (isDue ? '' : ' calm') + '" data-act="medicine">Medicine given</button>' +
       '<button class="act small add" data-act="add">Add past</button></div></div>';
     dock.innerHTML = html;
     measureDock();
@@ -550,7 +562,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       id: entry.id, isNew: false, type: entry.type, side: entry.side, by: entry.by,
       start: toInput(entry.start), end: toInput(entry.end), error: ''
     } : {
-      id: newId(), isNew: true, type: 'feed', side: 'Left', by: S.who,
+      id: newId(), isNew: true, type: 'feed', side: '', by: S.who,
       start: toInput(now - 20 * MIN), end: toInput(now), error: ''
     };
     renderSheet();
@@ -559,19 +571,21 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
   function renderSheet() {
     var sheet = document.getElementById('sheet');
     var f = S.form;
+    if (S.doseCheck) {
+      var d = S.doseCheck;
+      sheet.innerHTML = '<div class="panel" role="alertdialog" aria-labelledby="dose-title"><h3 id="dose-title">Medicine isn’t due yet</h3>' +
+        '<p>The last dose was logged ' + (Date.now() - d.start < MIN ? 'just now' : span(Date.now() - d.start) + ' ago') + ' at ' + clock(d.start) + (d.by ? ' by ' + esc(d.by) : '') + '. Logging another dose restarts the countdown.</p>' +
+        '<div class="panel-actions"><button type="button" class="btn" data-dose="cancel" style="margin-left:auto">Cancel</button><button type="button" class="btn primary" data-dose="log" style="margin-left:0">Log another dose</button></div></div>';
+      sheet.hidden = false;
+      return;
+    }
     if (S.settingsOpen) { renderSettings(sheet); return; }
     if (!f) { sheet.hidden = true; sheet.innerHTML = ''; return; }
-    var timed = f.type === 'feed' || f.type === 'sleep';
+    var timed = f.type === 'sleep';
     var html = '<form class="panel" id="entry-form" novalidate><h3>' + (f.isNew ? 'Add a past entry' : 'Edit ' + LABEL[f.type].toLowerCase()) + '</h3>';
     if (f.isNew) {
-      html += '<div class="seg" role="group" aria-label="Type">' + ['feed', 'sleep', 'pee', 'poop'].map(function (t) {
+      html += '<div class="seg" role="group" aria-label="Type">' + ['feed', 'poop', 'sleep', 'medicine'].map(function (t) {
         return '<button type="button" data-form="type" data-value="' + t + '" aria-pressed="' + (f.type === t) + '">' + LABEL[t] + '</button>';
-      }).join('') + '</div>';
-    }
-    if (f.type === 'feed') {
-      var current = f.side.indexOf(', ') > -1 ? 'Both' : f.side;
-      html += '<div class="seg" role="group" aria-label="Side">' + ['Left', 'Right', 'Both'].map(function (s) {
-        return '<button type="button" data-form="side" data-value="' + s + '" aria-pressed="' + (current === s) + '">' + s + '</button>';
       }).join('') + '</div>';
     }
     html += '<label class="field" for="f-start">' + (timed ? 'Started' : 'Time') + '<input id="f-start" type="datetime-local" value="' + esc(f.start) + '"></label>';
@@ -591,6 +605,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
         return '<button type="button" data-who="' + w + '" aria-pressed="' + (S.draftWho === w) + '">' + w + '</button>';
       }).join('') + '</div>' +
       '<label class="field" for="f-baby">Baby’s name<input id="f-baby" type="text" maxlength="30" autocomplete="off" value="' + esc(S.draftBaby) + '"></label>' +
+      (S.topic ? '<div class="field">Medicine notifications<small>In the ntfy app, subscribe to this topic on each phone. Keep it private.</small><div class="topic"><code>' + esc(S.topic) + '</code><button type="button" class="btn" data-act="copy-topic">Copy</button></div></div>' : '') +
       (S.settingsError ? '<p class="error" role="alert">' + esc(S.settingsError) + '</p>' : '') +
       '<div class="panel-actions">' + (first ? '' : '<button type="button" class="btn" data-who-cancel="1" style="margin-left:auto">Cancel</button>') +
       '<button type="submit" class="btn primary"' + (first ? '' : ' style="margin-left:0"') + '>Save</button></div></form>';
@@ -607,7 +622,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     f.start = document.getElementById('f-start').value;
     var endInput = document.getElementById('f-end');
     f.end = endInput ? endInput.value : '';
-    var timed = f.type === 'feed' || f.type === 'sleep';
+    var timed = f.type === 'sleep';
     var start = fromInput(f.start);
     var end = timed && f.end ? fromInput(f.end) : null;
     var limit = Date.now() + MIN;
@@ -617,9 +632,8 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     else if (end !== null && end > limit) f.error = 'The end time is in the future. Choose an earlier time, or leave it empty.';
     else if (end !== null && end < start) f.error = 'The end time is before the start time.';
     if (f.error) { renderSheet(); return; }
-    var side = '';
-    if (f.type === 'feed') side = f.side || 'Left';
-    saveEntry({ id: f.id, type: f.type, start: start, end: end, side: side, by: f.by || S.who });
+    if (!timed) end = start;
+    saveEntry({ id: f.id, type: f.type, start: start, end: end, side: '', by: f.by || S.who });
     var message = LABEL[f.type] + ' saved';
     S.form = null; renderSheet();
     toast(message);
@@ -627,15 +641,20 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 
   /* Actions */
   function find(id) { return entries().filter(function (e) { return e.id === id; })[0]; }
-  function startTimer(type, side) {
-    var entry = { id: newId(), type: type, start: Date.now(), end: null, side: side || '', by: S.who };
+  function startTimer(type) {
+    var entry = { id: newId(), type: type, start: Date.now(), end: null, side: '', by: S.who };
     saveEntry(entry);
-    toast((type === 'feed' ? 'Feed started on ' + side : 'Sleep started'), function () { removeEntry(entry.id); });
+    toast('Sleep started', function () { removeEntry(entry.id); });
+  }
+  function logDose() {
+    var entry = { id: newId(), type: 'medicine', start: Date.now(), end: null, side: '', by: S.who };
+    entry.end = entry.start;
+    saveEntry(entry);
+    toast('Medicine logged. Next dose in ' + S.medHours + ' hours.', function () { removeEntry(entry.id); });
   }
   function act(el) {
     var a = el.getAttribute('data-act');
     var id = el.getAttribute('data-id');
-    if (a === 'feed') startTimer('feed', el.getAttribute('data-side'));
     if (a === 'sleep') startTimer('sleep');
     if (a === 'tap') {
       var type = el.getAttribute('data-type');
@@ -651,12 +670,14 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       saveEntry(stopped);
       toast(LABEL[running.type] + ' saved, ' + span(stopped.end - stopped.start), function () { saveEntry(running); });
     }
-    if (a === 'switch') {
-      var feed = find(id);
-      if (!feed) return;
-      var parts = feed.side.split(', ');
-      parts.push(other(parts[parts.length - 1]));
-      saveEntry(Object.assign({}, feed, { side: parts.slice(-20).join(', ') }));
+    if (a === 'medicine') {
+      var dose = lastDose(entries());
+      if (dose && Date.now() < dose.start + S.medHours * HOUR) { S.doseCheck = dose; renderSheet(); poll(); return; }
+      logDose();
+    }
+    if (a === 'copy-topic') {
+      var done = function () { toast('Topic copied'); };
+      if (navigator.clipboard) navigator.clipboard.writeText(S.topic).then(done, function () {});
     }
     if (a === 'edit') { var target = find(id); if (target) openForm(target); }
     if (a === 'add') openForm(null);
@@ -673,6 +694,13 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
   document.addEventListener('click', function (event) {
     var acting = event.target.closest('[data-act]');
     if (acting) { act(acting); return; }
+    var doseBtn = event.target.closest('[data-dose]');
+    if (doseBtn) {
+      var logIt = doseBtn.getAttribute('data-dose') === 'log';
+      S.doseCheck = null; renderSheet();
+      if (logIt) logDose();
+      return;
+    }
     var whoBtn = event.target.closest('[data-who]');
     if (whoBtn) {
       S.draftBaby = document.getElementById('f-baby').value;
@@ -686,12 +714,6 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       var endEl = document.getElementById('f-end');
       if (endEl) S.form.end = endEl.value;
       if (what === 'type') { S.form.type = control.getAttribute('data-value'); renderSheet(); }
-      if (what === 'side') {
-        var value = control.getAttribute('data-value');
-        if (value === 'Both') { if (S.form.side.indexOf(', ') === -1) S.form.side = 'Left, Right'; }
-        else S.form.side = value;
-        renderSheet();
-      }
       if (what === 'cancel') { S.form = null; renderSheet(); }
       if (what === 'delete') {
         var old = find(S.form.id);
@@ -733,7 +755,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     var minute = Math.floor(now / MIN);
     if (minute !== lastMinute) {
       lastMinute = minute;
-      if (S.loaded && !document.activeElement.closest('#sheet')) renderMain();
+      if (S.loaded && !document.activeElement.closest('#sheet')) renderAll();
     }
   }, 1000);
   setInterval(poll, POLL_MS);

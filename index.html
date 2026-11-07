@@ -17,7 +17,7 @@
   --bg: #F1F4F8; --surface: #FFFFFF; --surface-2: #E6EAF1; --line: #D3D9E4;
   --fg: #182030; --muted: #566175; --on-fill: #FFFFFF;
   --feed: #BF4A2A; --sleep: #4A56D0; --medicine: #0B7666; --poop: #7A5430;
-  --feed-soft: #F9E3DC; --sleep-soft: #E2E4FA; --medicine-soft: #D6F1EB; --poop-soft: #EFE2D4;
+  --weight: #2E6FA3; --weight-soft: #DCEAF5; --feed-soft: #F9E3DC; --sleep-soft: #E2E4FA; --medicine-soft: #D6F1EB; --poop-soft: #EFE2D4;
   --danger: #B3261E;
   --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --body: "Figtree", -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
@@ -27,7 +27,7 @@
     --bg: #0F1420; --surface: #191F2D; --surface-2: #252C3C; --line: #30394B;
     --fg: #E8EBF2; --muted: #A0AABC; --on-fill: #111520;
     --feed: #F2916F; --sleep: #98A4FF; --medicine: #5FD6C2; --poop: #C49A70;
-    --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
+    --weight: #7CB8E8; --weight-soft: #1C3044; --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
     --danger: #FF8A80;
     color-scheme: dark;
   }
@@ -36,7 +36,7 @@
   --bg: #0F1420; --surface: #191F2D; --surface-2: #252C3C; --line: #30394B;
   --fg: #E8EBF2; --muted: #A0AABC; --on-fill: #111520;
   --feed: #F2916F; --sleep: #98A4FF; --medicine: #5FD6C2; --poop: #C49A70;
-  --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
+  --weight: #7CB8E8; --weight-soft: #1C3044; --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
   --danger: #FF8A80;
   color-scheme: dark;
 }
@@ -120,6 +120,30 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 .row .what b { font-weight: 600; }
 .row .what small { display: block; font-size: .8125rem; color: var(--muted); }
 .row .by { font-size: .8125rem; color: var(--muted); }
+.fold { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 44px; margin: -12px 0 0; padding: 0; text-align: left; }
+.fold h2 { margin: 0; }
+.fold .count { font-size: .8125rem; font-weight: 600; color: var(--muted); }
+.fold .chev { display: inline-block; width: 28px; height: 28px; border-radius: 14px; background: var(--surface-2); text-align: center; line-height: 28px; font-weight: 700; transition: transform .15s; }
+.fold[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.fold + .list, .fold + .empty { margin-top: 2px; }
+.wt { display: grid; gap: 10px; background: var(--surface); border-radius: 14px; padding: 14px; }
+.wt-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.wt-head b { font: 700 1.9rem/1 var(--display); color: var(--weight); }
+.wt-head b small { font: 600 1rem/1 var(--body); }
+.wt-head p { margin: 4px 0 0; color: var(--muted); font-size: .875rem; }
+.wt-head .btn { min-height: 44px; background: var(--weight-soft); color: var(--weight); }
+.wt svg { display: block; width: 100%; height: auto; overflow: visible; }
+.wt svg text { fill: var(--muted); font: 500 11px var(--body); font-variant-numeric: tabular-nums; }
+.wt svg .grid { stroke: var(--line); stroke-width: 1; }
+.wt svg .area { fill: var(--weight-soft); }
+.wt svg .line { fill: none; stroke: var(--weight); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.wt svg .pt { fill: var(--surface); stroke: var(--weight); stroke-width: 2; }
+.wt svg .pt.last { fill: var(--weight); }
+.wt svg .hit { fill: transparent; cursor: pointer; }
+.wt svg .tag { fill: var(--weight); font-weight: 700; font-size: 12px; }
+.wt-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.wt-list button { min-height: 36px; padding: 0 10px; border-radius: 18px; background: var(--surface-2); font-size: .8125rem; font-weight: 600; }
+.swatch.weight { background: var(--weight); }
 .empty { background: var(--surface); border-radius: 14px; padding: 18px; color: var(--muted); margin: 0; }
 
 .week { width: 100%; }
@@ -201,7 +225,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
   var KEY = 'babylog.v1';
   var POLL_MS = 15000;
   var MIN = 60000, HOUR = 3600000;
-  var LABEL = { feed: 'Feed', sleep: 'Sleep', poop: 'Poop', medicine: 'Medicine' };
+  var LABEL = { feed: 'Feed', sleep: 'Sleep', poop: 'Poop', medicine: 'Medicine', weight: 'Weight' };
 
   var S = {
     server: [], outbox: [], baby: 'Baby', medHours: 8, topic: '', who: '', theme: '',
@@ -221,13 +245,13 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
       S.server = (saved.server || []).map(normalize); S.outbox = saved.outbox || [];
       S.outbox.forEach(function (op) { if (op.entry) op.entry = normalize(op.entry); });
-      S.baby = saved.baby || 'Baby'; S.medHours = saved.medHours || 8; S.topic = saved.topic || ''; S.who = saved.who || ''; S.theme = saved.theme || ''; S.api = saved.api || '';
+      S.baby = saved.baby || 'Baby'; S.medHours = saved.medHours || 8; S.topic = saved.topic || ''; S.logOpen = !!saved.logOpen; S.who = saved.who || ''; S.theme = saved.theme || ''; S.api = saved.api || '';
       if (saved.server) S.loaded = true;
     } catch (e) {}
   }
   function store() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ server: S.server, outbox: S.outbox, baby: S.baby, medHours: S.medHours, topic: S.topic, who: S.who, theme: S.theme, api: S.api }));
+      localStorage.setItem(KEY, JSON.stringify({ server: S.server, outbox: S.outbox, baby: S.baby, medHours: S.medHours, topic: S.topic, logOpen: S.logOpen, who: S.who, theme: S.theme, api: S.api }));
     } catch (e) {}
   }
 
@@ -353,7 +377,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 
   function dayStats(list, offset) {
     var from = dayStart(offset), to = dayStart(offset + 1), now = Date.now();
-    var out = { feed: 0, poop: 0, medicine: 0, sleep: 0 };
+    var out = { feed: 0, poop: 0, medicine: 0, sleep: 0, weight: 0 };
     list.forEach(function (e) {
       if (e.type === 'sleep') {
         var a = Math.max(e.start, from), b = Math.min(e.end === null ? now : e.end, to);
@@ -433,7 +457,8 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       '<div class="stat sleep"><b>' + hoursShort(stats.sleep) + '</b><span>Sleep</span></div></section>';
 
     html += '<section><h2>' + (off === 0 ? 'Today, hour by hour' : 'Hour by hour') + '</h2>' + stripHtml(list, off) + '</section>';
-    html += '<section><h2>Log</h2>' + logHtml(list, off) + '</section>';
+    html += '<section>' + weightHtml(list) + '</section>';
+    html += '<section>' + logHtml(list, off) + '</section>';
     html += '<section><h2>Last 7 days</h2>' + weekHtml(list, off) + '</section>';
 
     app.innerHTML = html;
@@ -483,9 +508,13 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       var end = e.end === null ? Date.now() : e.end;
       return e.type === 'sleep' ? (end > from && e.start < to) : (e.start >= from && e.start < to);
     });
-    if (!rows.length) return '<p class="empty">Nothing logged ' + (off === 0 ? 'yet today' : 'on this day') + '.</p>';
-    return '<div class="list">' + rows.map(function (e) {
+    var head = '<button class="fold" data-act="fold" aria-expanded="' + S.logOpen + '" aria-controls="log-body"><h2>Log</h2>' +
+      '<span class="count">' + rows.length + (rows.length === 1 ? ' entry' : ' entries') + ' <span class="chev" aria-hidden="true">›</span></span></button>';
+    if (!S.logOpen) return head;
+    if (!rows.length) return head + '<p class="empty" id="log-body">Nothing logged ' + (off === 0 ? 'yet today' : 'on this day') + '.</p>';
+    return head + '<div class="list" id="log-body">' + rows.map(function (e) {
       var detail = '';
+      if (e.type === 'weight') detail = kgText(e.kg);
       if (e.type === 'sleep') {
         var range = e.end === null ? 'in progress' : span(e.end - e.start) + ', until ' + clock(e.end);
         detail = (e.start < from ? 'from yesterday, ' : '') + range;
@@ -494,6 +523,69 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
         '<span class="what"><b>' + LABEL[e.type] + '</b>' + (detail ? '<small>' + esc(detail) + '</small>' : '') + '</span>' +
         '<span class="by">' + esc(e.by) + '</span></button>';
     }).join('') + '</div>';
+  }
+
+  function kgText(kg) { var g = Math.round(kg * 1000); return (g / 1000).toFixed(g % 10 ? 3 : 2) + ' kg'; }
+  function gramsText(g) { return (g > 0 ? '+' : g < 0 ? '−' : '±') + Math.abs(Math.round(g)) + ' g'; }
+  function shortDate(ms) { return new Date(ms).toLocaleDateString([], { month: 'short', day: 'numeric' }); }
+
+  function niceStep(range) {
+    var steps = [0.05, 0.1, 0.2, 0.25, 0.5, 1, 2, 5];
+    for (var i = 0; i < steps.length; i++) if (range / steps[i] <= 4) return steps[i];
+    return 10;
+  }
+
+  /* Weight over time, all entries; the x axis is real time so gaps show as gaps */
+  function weightHtml(list) {
+    var pts = list.filter(function (e) { return e.type === 'weight'; }).sort(function (a, b) { return a.start - b.start; });
+    var latest = pts[pts.length - 1];
+    var head = '<h2>Weight</h2><div class="wt"><div class="wt-head"><div>';
+    if (!latest) {
+      return head + '<b>–</b><p>No weight logged yet. Add the birth weight or the last weigh-in to start the chart.</p></div>' +
+        '<button class="btn" data-act="weight">Add weight</button></div></div>';
+    }
+    head += '<b>' + kgText(latest.kg).replace(' kg', '<small> kg</small>') + '</b><p>' + shortDate(latest.start);
+    if (pts.length > 1) {
+      var prev = pts[pts.length - 2], first = pts[0];
+      head += ' · ' + gramsText((latest.kg - prev.kg) * 1000) + ' since ' + shortDate(prev.start);
+      if (pts.length > 2) head += ' · ' + gramsText((latest.kg - first.kg) * 1000) + ' since first';
+    }
+    head += '</p></div><button class="btn" data-act="weight">Add weight</button></div>';
+
+    var W = 340, H = 170, L = 38, R = 14, T = 16, B = 24;
+    var lo = Math.min.apply(null, pts.map(function (p) { return p.kg; }));
+    var hi = Math.max.apply(null, pts.map(function (p) { return p.kg; }));
+    var step = niceStep(Math.max(hi - lo, 0.2));
+    var y0 = Math.floor((lo - step / 4) / step) * step, y1 = Math.ceil((hi + step / 4) / step) * step;
+    if (y1 - y0 < step * 2) y1 = y0 + step * 2;
+    var t0 = pts[0].start, t1 = latest.start;
+    if (t1 - t0 < 86400000) { t0 -= 43200000; t1 += 43200000; }
+    var X = function (t) { return L + (t - t0) / (t1 - t0) * (W - L - R); };
+    var Y = function (kg) { return T + (y1 - kg) / (y1 - y0) * (H - T - B); };
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Weight chart, from ' + kgText(pts[0].kg) + ' to ' + kgText(latest.kg) + '">';
+    var digits = step < 0.1 ? 2 : 1;
+    for (var v = y0; v <= y1 + 1e-9; v += step) {
+      svg += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '"></line>' +
+        '<text x="' + (L - 6) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end">' + v.toFixed(digits) + '</text>';
+    }
+    var line = pts.map(function (p, i) { return (i ? 'L' : 'M') + X(p.start).toFixed(1) + ' ' + Y(p.kg).toFixed(1); }).join(' ');
+    if (pts.length > 1) {
+      svg += '<path class="area" d="' + line + ' L' + X(latest.start).toFixed(1) + ' ' + Y(y0) + ' L' + X(pts[0].start).toFixed(1) + ' ' + Y(y0) + ' Z"></path>' +
+        '<path class="line" d="' + line + '"></path>';
+    }
+    pts.forEach(function (p, i) {
+      var last = i === pts.length - 1;
+      svg += '<circle class="pt' + (last ? ' last' : '') + '" cx="' + X(p.start).toFixed(1) + '" cy="' + Y(p.kg).toFixed(1) + '" r="' + (last ? 5 : 3.5) + '"></circle>' +
+        '<circle class="hit" data-act="edit" data-id="' + esc(p.id) + '" cx="' + X(p.start).toFixed(1) + '" cy="' + Y(p.kg).toFixed(1) + '" r="12"><title>' + esc(kgText(p.kg) + ', ' + shortDate(p.start)) + '</title></circle>';
+    });
+    var lx = X(latest.start), ly = Y(latest.kg);
+    svg += '<text class="tag" x="' + (lx - 8).toFixed(1) + '" y="' + (ly - 10).toFixed(1) + '" text-anchor="end">' + latest.kg.toFixed(2) + '</text>';
+    svg += '<text x="' + L + '" y="' + (H - 6) + '">' + shortDate(pts[0].start) + '</text>' +
+      '<text x="' + (W - R) + '" y="' + (H - 6) + '" text-anchor="end">' + shortDate(latest.start) + '</text></svg>';
+    var chips = '<div class="wt-list" aria-label="Edit a weight">' + pts.slice(-6).reverse().map(function (p) {
+      return '<button data-act="edit" data-id="' + esc(p.id) + '">' + shortDate(p.start) + ' · ' + kgText(p.kg) + '</button>';
+    }).join('') + '</div>';
+    return head + svg + chips + '</div>';
   }
 
   function weekHtml(list, off) {
@@ -556,14 +648,14 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
   }
 
   /* Editor sheet */
-  function openForm(entry) {
+  function openForm(entry, type) {
     var now = Date.now();
     S.form = entry ? {
-      id: entry.id, isNew: false, type: entry.type, side: entry.side, by: entry.by,
+      id: entry.id, isNew: false, type: entry.type, side: entry.side, by: entry.by, kg: entry.kg ? String(entry.kg) : '',
       start: toInput(entry.start), end: toInput(entry.end), error: ''
     } : {
-      id: newId(), isNew: true, type: 'feed', side: '', by: S.who,
-      start: toInput(now - 20 * MIN), end: toInput(now), error: ''
+      id: newId(), isNew: true, type: type || 'feed', side: '', by: S.who, kg: '',
+      start: toInput(type === 'weight' ? now : now - 20 * MIN), end: toInput(now), error: ''
     };
     renderSheet();
   }
@@ -582,13 +674,14 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     if (S.settingsOpen) { renderSettings(sheet); return; }
     if (!f) { sheet.hidden = true; sheet.innerHTML = ''; return; }
     var timed = f.type === 'sleep';
-    var html = '<form class="panel" id="entry-form" novalidate><h3>' + (f.isNew ? 'Add a past entry' : 'Edit ' + LABEL[f.type].toLowerCase()) + '</h3>';
-    if (f.isNew) {
-      html += '<div class="seg" role="group" aria-label="Type">' + ['feed', 'poop', 'sleep', 'medicine'].map(function (t) {
+    var html = '<form class="panel" id="entry-form" novalidate><h3>' + (f.isNew ? (f.type === 'weight' && S.weightOnly ? 'Add weight' : 'Add a past entry') : 'Edit ' + LABEL[f.type].toLowerCase()) + '</h3>';
+    if (f.isNew && !S.weightOnly) {
+      html += '<div class="seg" role="group" aria-label="Type">' + ['feed', 'poop', 'sleep', 'medicine', 'weight'].map(function (t) {
         return '<button type="button" data-form="type" data-value="' + t + '" aria-pressed="' + (f.type === t) + '">' + LABEL[t] + '</button>';
       }).join('') + '</div>';
     }
     html += '<label class="field" for="f-start">' + (timed ? 'Started' : 'Time') + '<input id="f-start" type="datetime-local" value="' + esc(f.start) + '"></label>';
+    if (f.type === 'weight') html += '<label class="field" for="f-kg"><span>Weight in kg <small>(for example 3.45)</small></span><input id="f-kg" type="text" inputmode="decimal" autocomplete="off" value="' + esc(f.kg) + '"></label>';
     if (timed) html += '<label class="field" for="f-end"><span>Ended <small>(leave empty if it’s still going)</small></span><input id="f-end" type="datetime-local" value="' + esc(f.end) + '"></label>';
     if (f.error) html += '<p class="error" role="alert">' + esc(f.error) + '</p>';
     html += '<div class="panel-actions">' + (f.isNew ? '' : '<button type="button" class="btn delete" data-form="delete">Delete</button>') +
@@ -605,7 +698,6 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
         return '<button type="button" data-who="' + w + '" aria-pressed="' + (S.draftWho === w) + '">' + w + '</button>';
       }).join('') + '</div>' +
       '<label class="field" for="f-baby">Baby’s name<input id="f-baby" type="text" maxlength="30" autocomplete="off" value="' + esc(S.draftBaby) + '"></label>' +
-      (S.topic ? '<div class="field">Medicine notifications<small>In the ntfy app, subscribe to this topic on each phone. Keep it private.</small><div class="topic"><code>' + esc(S.topic) + '</code><button type="button" class="btn" data-act="copy-topic">Copy</button></div></div>' : '') +
       (S.settingsError ? '<p class="error" role="alert">' + esc(S.settingsError) + '</p>' : '') +
       '<div class="panel-actions">' + (first ? '' : '<button type="button" class="btn" data-who-cancel="1" style="margin-left:auto">Cancel</button>') +
       '<button type="submit" class="btn primary"' + (first ? '' : ' style="margin-left:0"') + '>Save</button></div></form>';
@@ -626,14 +718,23 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     var start = fromInput(f.start);
     var end = timed && f.end ? fromInput(f.end) : null;
     var limit = Date.now() + MIN;
+    var kgInput = document.getElementById('f-kg');
+    if (kgInput) f.kg = kgInput.value;
+    var kg = parseFloat(String(f.kg).replace(',', '.'));
+    if (kg > 300) kg = kg / 1000;
     f.error = '';
-    if (start === null) f.error = 'Enter when it started.';
+    if (f.type === 'weight' && !(kg >= 0.3 && kg <= 30)) f.error = 'Enter the weight in kg, for example 3.45. Grams like 3450 also work.';
+    if (f.error) {}
+    else if (start === null) f.error = 'Enter when it started.';
     else if (start > limit) f.error = 'The start time is in the future. Choose an earlier time.';
     else if (end !== null && end > limit) f.error = 'The end time is in the future. Choose an earlier time, or leave it empty.';
     else if (end !== null && end < start) f.error = 'The end time is before the start time.';
     if (f.error) { renderSheet(); return; }
     if (!timed) end = start;
-    saveEntry({ id: f.id, type: f.type, start: start, end: end, side: '', by: f.by || S.who });
+    var saved = { id: f.id, type: f.type, start: start, end: end, side: '', by: f.by || S.who };
+    if (f.type === 'weight') saved.kg = Math.round(kg * 1000) / 1000;
+    saveEntry(saved);
+    S.weightOnly = false;
     var message = LABEL[f.type] + ' saved';
     S.form = null; renderSheet();
     toast(message);
@@ -679,8 +780,11 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       var done = function () { toast('Topic copied'); };
       if (navigator.clipboard) navigator.clipboard.writeText(S.topic).then(done, function () {});
     }
+    if (a === 'edit') { S.weightOnly = false; }
     if (a === 'edit') { var target = find(id); if (target) openForm(target); }
-    if (a === 'add') openForm(null);
+    if (a === 'add') { S.weightOnly = false; openForm(null); }
+    if (a === 'weight') { S.weightOnly = true; openForm(null, 'weight'); }
+    if (a === 'fold') { S.logOpen = !S.logOpen; store(); renderMain(); var f = document.querySelector('.fold'); if (f) f.focus(); }
     if (a === 'settings') openSettings();
     if (a === 'theme') {
       S.theme = S.theme === '' ? 'dark' : S.theme === 'dark' ? 'light' : '';
@@ -711,10 +815,12 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     if (control && S.form) {
       var what = control.getAttribute('data-form');
       S.form.start = document.getElementById('f-start').value;
+      var kgEl = document.getElementById('f-kg');
+      if (kgEl) S.form.kg = kgEl.value;
       var endEl = document.getElementById('f-end');
       if (endEl) S.form.end = endEl.value;
       if (what === 'type') { S.form.type = control.getAttribute('data-value'); renderSheet(); }
-      if (what === 'cancel') { S.form = null; renderSheet(); }
+      if (what === 'cancel') { S.form = null; S.weightOnly = false; renderSheet(); }
       if (what === 'delete') {
         var old = find(S.form.id);
         removeEntry(S.form.id);

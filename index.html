@@ -17,7 +17,7 @@
   --bg: #F1F4F8; --surface: #FFFFFF; --surface-2: #E6EAF1; --line: #D3D9E4;
   --fg: #182030; --muted: #566175; --on-fill: #FFFFFF;
   --feed: #BF4A2A; --sleep: #4A56D0; --medicine: #0B7666; --poop: #7A5430;
-  --weight: #2E6FA3; --weight-soft: #DCEAF5; --feed-soft: #F9E3DC; --sleep-soft: #E2E4FA; --medicine-soft: #D6F1EB; --poop-soft: #EFE2D4;
+  --mom: #8A4FB8; --dad: #2E6FA3; --weight: #2E6FA3; --weight-soft: #DCEAF5; --feed-soft: #F9E3DC; --sleep-soft: #E2E4FA; --medicine-soft: #D6F1EB; --poop-soft: #EFE2D4;
   --danger: #B3261E;
   --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --body: "Figtree", -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
@@ -27,7 +27,7 @@
     --bg: #0F1420; --surface: #191F2D; --surface-2: #252C3C; --line: #30394B;
     --fg: #E8EBF2; --muted: #A0AABC; --on-fill: #111520;
     --feed: #F2916F; --sleep: #98A4FF; --medicine: #5FD6C2; --poop: #C49A70;
-    --weight: #7CB8E8; --weight-soft: #1C3044; --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
+    --mom: #C9A2EC; --dad: #7CB8E8; --weight: #7CB8E8; --weight-soft: #1C3044; --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
     --danger: #FF8A80;
     color-scheme: dark;
   }
@@ -36,7 +36,7 @@
   --bg: #0F1420; --surface: #191F2D; --surface-2: #252C3C; --line: #30394B;
   --fg: #E8EBF2; --muted: #A0AABC; --on-fill: #111520;
   --feed: #F2916F; --sleep: #98A4FF; --medicine: #5FD6C2; --poop: #C49A70;
-  --weight: #7CB8E8; --weight-soft: #1C3044; --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
+  --mom: #C9A2EC; --dad: #7CB8E8; --weight: #7CB8E8; --weight-soft: #1C3044; --feed-soft: #40261F; --sleep-soft: #272C52; --medicine-soft: #173D38; --poop-soft: #392C20;
   --danger: #FF8A80;
   color-scheme: dark;
 }
@@ -143,6 +143,17 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 .wt svg .tag { fill: var(--weight); font-weight: 700; font-size: 12px; }
 .wt-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .wt-list button { min-height: 36px; padding: 0 10px; border-radius: 18px; background: var(--surface-2); font-size: .8125rem; font-weight: 600; }
+.rest { display: grid; gap: 8px; background: var(--surface); border-radius: 14px; padding: 14px; }
+.rest-key { display: flex; gap: 14px; font-size: .8125rem; font-weight: 600; color: var(--muted); }
+.rest-key i { display: inline-block; width: 10px; height: 10px; border-radius: 5px; margin-right: 6px; vertical-align: -1px; }
+.rest-row { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; align-items: center; font-size: .8125rem; }
+.rest-row > span { color: var(--muted); font-weight: 600; }
+.rest-bars { display: grid; gap: 3px; min-width: 0; }
+.rest-bar { display: flex; align-items: center; gap: 6px; min-width: 0; height: 16px; }
+.rest-bar i { display: block; height: 10px; border-radius: 5px; min-width: 4px; }
+.rest-bar b { font-weight: 600; white-space: nowrap; }
+.rest-bar.none b { font-weight: 400; color: var(--muted); }
+.rest p { margin: 0; color: var(--muted); }
 .swatch.weight { background: var(--weight); }
 .empty { background: var(--surface); border-radius: 14px; padding: 18px; color: var(--muted); margin: 0; }
 
@@ -235,7 +246,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 
   /* A running timer has no end time, whatever form that takes on the way from Google */
   function normalize(entry) {
-    var end = entry.type === 'sleep' ? (entry.end ? entry.end : null) : entry.start;
+    var end = entry.type === 'sleep' ? (entry.end ? entry.end : null) : entry.type === 'rest' ? entry.end : entry.start;
     return Object.assign({}, entry, { end: end });
   }
 
@@ -377,8 +388,9 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 
   function dayStats(list, offset) {
     var from = dayStart(offset), to = dayStart(offset + 1), now = Date.now();
-    var out = { feed: 0, poop: 0, medicine: 0, sleep: 0, weight: 0 };
+    var out = { feed: 0, poop: 0, medicine: 0, sleep: 0, weight: 0, rest: 0 };
     list.forEach(function (e) {
+      if (e.type === 'rest') return;
       if (e.type === 'sleep') {
         var a = Math.max(e.start, from), b = Math.min(e.end === null ? now : e.end, to);
         if (b > a) out.sleep += b - a;
@@ -458,6 +470,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
 
     html += '<section><h2>' + (off === 0 ? 'Today, hour by hour' : 'Hour by hour') + '</h2>' + stripHtml(list, off) + '</section>';
     html += '<section>' + weightHtml(list) + '</section>';
+    html += '<section>' + parentsHtml(list) + '</section>';
     html += '<section>' + logHtml(list, off) + '</section>';
     html += '<section><h2>Last 7 days</h2>' + weekHtml(list, off) + '</section>';
 
@@ -505,6 +518,7 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
   function logHtml(list, off) {
     var from = dayStart(off), to = dayStart(off + 1);
     var rows = list.filter(function (e) {
+      if (e.type === 'rest') return false;
       var end = e.end === null ? Date.now() : e.end;
       return e.type === 'sleep' ? (end > from && e.start < to) : (e.start >= from && e.start < to);
     });
@@ -586,6 +600,32 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
       return '<button data-act="edit" data-id="' + esc(p.id) + '">' + shortDate(p.start) + ' · ' + kgText(p.kg) + '</button>';
     }).join('') + '</div>';
     return head + svg + chips + '</div>';
+  }
+
+  /* Each parent's main sleep per night, from their watch; nights are named by the morning they ended */
+  function parentsHtml(list) {
+    var rest = list.filter(function (e) { return e.type === 'rest' && e.end; });
+    var html = '<h2>Parents’ sleep</h2><div class="rest">';
+    if (!rest.length) {
+      return html + '<p>Sleep from your watches appears here each morning, once the phone shortcut is set up.</p></div>';
+    }
+    var people = ['Mom', 'Dad'].filter(function (who) { return rest.some(function (e) { return e.by === who; }); });
+    var color = { Mom: 'var(--mom)', Dad: 'var(--dad)' };
+    html += '<div class="rest-key">' + people.map(function (who) { return '<span><i style="background:' + color[who] + '"></i>' + who + '</span>'; }).join('') + '</div>';
+    var MAXH = 10;
+    for (var i = 0; i > -7; i--) {
+      var from = dayStart(i), to = dayStart(i + 1);
+      var label = i === 0 ? 'Last night' : i === -1 ? 'Night before' : new Date(from).toLocaleDateString([], { weekday: 'short', day: 'numeric' });
+      html += '<div class="rest-row"><span>' + esc(label) + '</span><div class="rest-bars">';
+      people.forEach(function (who) {
+        var night = rest.filter(function (e) { return e.by === who && e.end >= from && e.end < to; })[0];
+        if (!night) { html += '<div class="rest-bar none"><b>' + who + ': no data</b></div>'; return; }
+        var pct = Math.min(100, night.mins / 60 / MAXH * 100);
+        html += '<div class="rest-bar" title="' + esc(who + ', ' + clock(night.start) + ' to ' + clock(night.end)) + '"><i style="width:calc(' + pct.toFixed(1) + '% - 50px);background:' + color[who] + '"></i><b>' + hoursShort(night.mins * MIN) + '</b></div>';
+      });
+      html += '</div></div>';
+    }
+    return html + '</div>';
   }
 
   function weekHtml(list, off) {

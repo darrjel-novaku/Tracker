@@ -602,23 +602,23 @@ h2 { margin: 0 0 10px; font: 600 .8125rem/1.2 var(--body); letter-spacing: .05em
     return head + svg + chips + '</div>';
   }
 
-  /* Each parent's main sleep per night, from their watch; nights are named by the morning they ended */
+  /* Each parent's total sleep per day from their watch, naps included */
   function parentsHtml(list) {
     var rest = list.filter(function (e) { return e.type === 'rest' && e.end; });
     var html = '<h2>Parents’ sleep</h2><div class="rest">';
     if (!rest.length) {
-      return html + '<p>Sleep from your watches appears here each morning, once the phone shortcut is set up.</p></div>';
+      return html + '<p>Sleep from your watches appears here, added up for each day, once the phone shortcut is set up.</p></div>';
     }
     var people = ['Mom', 'Dad'].filter(function (who) { return rest.some(function (e) { return e.by === who; }); });
     var color = { Mom: 'var(--mom)', Dad: 'var(--dad)' };
     html += '<div class="rest-key">' + people.map(function (who) { return '<span><i style="background:' + color[who] + '"></i>' + who + '</span>'; }).join('') + '</div>';
-    var MAXH = 10;
+    var MAXH = 12;
     for (var i = 0; i > -7; i--) {
       var from = dayStart(i), to = dayStart(i + 1);
-      var label = i === 0 ? 'Last night' : i === -1 ? 'Night before' : new Date(from).toLocaleDateString([], { weekday: 'short', day: 'numeric' });
+      var label = i === 0 ? 'Today' : i === -1 ? 'Yesterday' : new Date(from).toLocaleDateString([], { weekday: 'short', day: 'numeric' });
       html += '<div class="rest-row"><span>' + esc(label) + '</span><div class="rest-bars">';
       people.forEach(function (who) {
-        var night = rest.filter(function (e) { return e.by === who && e.end >= from && e.end < to; })[0];
+        var night = rest.filter(function (e) { return e.by === who && e.end > from && e.end <= to; })[0];
         if (!night) { html += '<div class="rest-bar none"><b>' + who + ': no data</b></div>'; return; }
         var pct = Math.min(100, night.mins / 60 / MAXH * 100);
         html += '<div class="rest-bar" title="' + esc(who + ', ' + clock(night.start) + ' to ' + clock(night.end)) + '"><i style="width:calc(' + pct.toFixed(1) + '% - 50px);background:' + color[who] + '"></i><b>' + hoursShort(night.mins * MIN) + '</b></div>';
